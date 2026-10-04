@@ -1,0 +1,699 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>وقار — خطة الإطلاق والتيست</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (max 1180px) with a sticky section index; leather-brown accent on a near-black ground. Deliberately dark-only. */
+:root{
+  --bg:#0F0D0C; --panel:#171412; --panel-2:#1F1B18; --line:rgba(237,228,216,.12);
+  --fg:#EDE4D8; --mute:rgba(237,228,216,.62); --accent:#C8894B; --accent-2:#8E5A2B;
+  --good:#7FB685; --warn:#E0B14D; --bad:#E07A5F;
+  --f-display:"Alexandria","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.75;direction:rtl;padding-inline:clamp(16px,3vw,40px);padding-block:0 80px}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:500;line-height:1.25;margin:0;text-wrap:balance}
+p{margin:0 0 12px}
+.wrap{max-width:1180px;margin-inline:auto}
+.ltr{direction:ltr;unicode-bidi:isolate;font-family:var(--f-mono);font-size:.92em;overflow-wrap:anywhere}
+.mono{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em}
+.mute{color:var(--mute)}
+header.hero{padding-block:clamp(48px,8vw,96px) 32px;border-bottom:1px solid var(--line);display:grid;gap:18px}
+.kicker{display:flex;flex-wrap:wrap;gap:8px;color:var(--mute)}
+.kicker span{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px}
+.hero h1{font-size:clamp(34px,5.6vw,68px);font-weight:700;letter-spacing:-.01em}
+.hero h1 b{color:var(--accent);font-weight:700}
+.hero p.lead{font-size:clamp(17px,1.6vw,20px);color:var(--mute);max-width:70ch}
+nav.toc{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin-inline:calc(-1*clamp(16px,3vw,40px));padding:10px clamp(16px,3vw,40px);overflow-x:auto;white-space:nowrap}
+nav.toc a{display:inline-block;color:var(--mute);text-decoration:none;font-size:14px;padding:6px 10px;border-radius:8px}
+nav.toc a:hover,nav.toc a.on{color:var(--fg);background:var(--panel-2)}
+section{padding-block:clamp(40px,6vw,72px);border-bottom:1px solid var(--line);scroll-margin-top:56px}
+.sec-h{display:grid;gap:8px;margin-bottom:26px}
+.sec-h .num{color:var(--accent);font-family:var(--f-mono);font-size:13px}
+.sec-h h2{font-size:clamp(26px,3.2vw,40px)}
+.sec-h p{color:var(--mute);max-width:75ch;margin:0}
+h3{font-size:clamp(19px,1.8vw,23px);margin:30px 0 12px}
+h4{font-size:17px;margin:18px 0 8px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
+.card h4{margin-top:0}
+.card ul{margin:6px 0 0;padding-inline-start:20px}
+.card li{margin-bottom:6px}
+.stat{display:grid;gap:4px}
+.stat b{font-family:var(--f-display);font-size:clamp(26px,2.6vw,34px);font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
+.stat span{color:var(--mute);font-size:14px}
+.callout{border-inline-start:3px solid var(--accent);background:var(--panel);padding:16px 18px;border-radius:0 12px 12px 0;margin:16px 0}
+.callout.warn{border-color:var(--warn)}
+.callout.bad{border-color:var(--bad)}
+.callout.good{border-color:var(--good)}
+.callout strong{color:var(--fg)}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:11px;padding:2px 7px;border-radius:6px;border:1px solid currentColor;margin-inline-start:4px;vertical-align:1px;white-space:nowrap}
+.v{color:var(--good)} .e{color:var(--warn)} .a{color:var(--bad)}
+.pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:999px;font-weight:500;white-space:nowrap}
+.p-block{background:rgba(224,122,95,.16);color:var(--bad)}
+.p-fix{background:rgba(224,177,77,.16);color:var(--warn)}
+.p-ok{background:rgba(127,182,133,.16);color:var(--good)}
+.p-check{background:rgba(237,228,216,.08);color:var(--mute)}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:12px 0}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:14.5px}
+th{background:var(--panel-2);color:var(--mute);font-weight:500;text-align:right;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:13px}
+td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+td.n{white-space:nowrap}
+tr.hl td{background:rgba(200,137,75,.08)}
+pre.calc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;direction:ltr;text-align:left;font-family:var(--f-mono);font-size:13.5px;line-height:1.7;margin:12px 0;color:var(--fg)}
+.script{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0;overflow:hidden}
+.script-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+.script-h h4{margin:0}
+.script table{min-width:560px}
+.script td:first-child{white-space:nowrap;color:var(--accent);font-family:var(--f-mono);font-size:12.5px;width:110px}
+.hook-list{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.hook{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start}
+.hook i{font-style:normal;font-family:var(--f-mono);font-size:11px;color:var(--accent);border:1px solid var(--accent-2);border-radius:6px;padding:1px 6px;white-space:nowrap;margin-top:4px}
+.checklist{display:grid;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ck{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+.ck:last-child{border-bottom:0}
+.ck input{margin-top:6px;accent-color:var(--accent);width:16px;height:16px}
+.ck small{display:block;color:var(--mute);font-size:13.5px}
+.bar{height:8px;background:var(--panel-2);border-radius:4px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.price-row{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:10px;align-items:center;margin:10px 0}
+.scale{position:relative;height:34px;background:var(--panel-2);border-radius:8px}
+.scale span{position:absolute;top:0;bottom:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--f-mono);color:#1a1410;font-weight:500;white-space:nowrap;overflow:hidden}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--mute);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:6px;vertical-align:0}
+footer{padding-top:40px;color:var(--mute);font-size:14px}
+@media (max-width:640px){body{font-size:15.5px}.price-row{grid-template-columns:1fr}}
+</style>
+</head><body>
+
+<div class="wrap">
+<header class="hero">
+  <div class="kicker"><span>طلب 5</span><span>عميل حالي: وقار</span><span>السعودية · سلة</span><span>Meta + TikTok</span><span>4 أكتوبر 2026</span></div>
+  <h1>وقار: نطلع إزاي على <b>ميتا وتيك توك</b> ونتيست صح</h1>
+  <p class="lead">تحليل كامل للبراند والمتجر والسوق، والتسعير اللي ننزل بيه، والعرض، والكونتنت، وبناء الحملات، والأرقام اللي نحكم بيها في أول 90 يوم. كل رقم متعلّم عليه: <span class="tag v">VERIFIED</span> له مصدر، و<span class="tag e">ESTIMATED</span> متحسوب والحسبة ظاهرة، و<span class="tag a">ASSUMPTION</span> افتراض لازم يتأكد.</p>
+</header>
+
+<nav class="toc" id="toc" aria-label="الأقسام">
+  <a href="#preflight">قبل ما نبدأ</a><a href="#verdict">الخلاصة</a><a href="#store">تحليل المتجر</a><a href="#market">السوق والمنافسين</a><a href="#pricing">التسعير</a><a href="#offer">العرض</a><a href="#economics">الأرقام</a><a href="#tracking">التراكينج</a><a href="#meta">ميتا</a><a href="#tiktok">تيك توك</a><a href="#creative">الكونتنت</a><a href="#scripts">السكريبتات</a><a href="#organic">الأورجانيك</a><a href="#kpi">KPIs</a><a href="#sop">إدارة الأكاونت</a><a href="#risk">المخاطر</a><a href="#roadmap">الخطة الزمنية</a>
+</nav>
+
+<!-- PRE-FLIGHT -->
+<section id="preflight">
+  <div class="sec-h"><span class="num">00 · Pre-Flight</span><h2>قبل ما نبدأ: اللي ناقص واللي افترضناه</h2><p>الحاجات دي بتغيّر الخطة لو اتغيّرت، فاتحطّت في الأول عشان تتأكد منها قبل ما تتصرف فلوس.</p></div>
+  <div class="callout bad"><strong>الموقع ما اتفتحش من عندي.</strong> waqarleather.com مقفول من شبكة السيرفر اللي شغال عليه، ومش متفهرس على جوجل لسه. يعني ده متجر جديد أو لسه مش public. عشان كده تحليل المتجر في القسم 02 معمول كـ <strong>Launch Gate</strong>، وهو 38 نقطة بتتأكد منها بنفسك بالموبايل في 20 دقيقة. ابعتلي سكرين شوتس الصفحة الرئيسية وصفحة المحفظة والشيك أوت، وأنا أقفل التحليل بتقييم فعلي لكل نقطة.</div>
+  <div class="grid g2">
+    <div class="card"><h4>ناقص وبيأثر على الخطة</h4><ul>
+      <li><b>الميزانية الشهرية:</b> مش موجودة. افترضت ميزانية تيست <span class="ltr">13,500 SAR</span> في الشهر الأول <span class="tag a">ASSUMPTION</span>.</li>
+      <li><b>تكلفة المنتج (COGS):</b> مش موجودة. استخرجتها من هامش 75–78.5% المذكور في ملفك <span class="tag e">ESTIMATED</span>.</li>
+      <li><b>تكلفة الشحن والتغليف:</b> افترضت 30 ريال شحن و10–15 ريال تغليف <span class="tag a">ASSUMPTION</span>.</li>
+      <li><b>حالة البيكسل والـ CAPI والدومين:</b> مش معروفة. اتعاملت معاها على إنها مش متعملة.</li>
+      <li><b>COD:</b> مش معروف متاح ولا لأ.</li>
+      <li><b>المخزون:</b> كام قطعة من كل لون؟ ده بيحدد نسكيل لحد فين.</li>
+    </ul></div>
+    <div class="card"><h4>أسئلة للعميل (مترتبة حسب تأثيرها)</h4><ol style="margin:6px 0 0;padding-inline-start:20px">
+      <li>السعر النهائي: هل يوافق على أسعار الإطلاق في القسم 04؟</li>
+      <li>حفر الأحرف: متاح؟ ببلاش؟ كام يوم زيادة؟ (ده أقوى bonus عندنا)</li>
+      <li>الشحن: مدته كام يوم؟ ومين بيدفعه؟</li>
+      <li>COD متاح؟ وبرسوم ولا من غير؟</li>
+      <li>ميكانيزم حافظة البطاقات «كبسة وتطلع الكروت» موجود فعلًا؟</li>
+      <li>الصانع يوافق يظهر بإيده وصوته؟ (من غير وشه كفاية)</li>
+      <li>المخزون من كل منتج ولون؟</li>
+    </ol></div>
+  </div>
+  <div class="callout warn"><strong>تحذير جدوى (اقراه قبل أي حاجة):</strong> براند جديد من غير ريفيوهات، بسعر 329 ريال، في سوق الـ CPM فيه 30–56 ريال على ميتا. لو الـ CTR كان 1.2% والتحويل 1%، الـ CPA هيطلع حوالي 330 ريال، وده أعلى من نقطة التعادل (158 ريال على المحفظة). يعني <strong>أول 30 يوم غالبًا هيبقوا خسارة أو تعادل</strong>، والكلام ده لازم يتقال للعميل كتابة. اللي بيقلب الحسبة 3 حاجات: (1) الطقم بـ 499 بيرفع الـ AOV، (2) الثقة على صفحة المنتج بترفع التحويل لـ 2%، (3) هوك قوي بيوصّل الـ CTR لـ 1.6%+. الحسبة كاملة في القسم 06.</div>
+</section>
+
+<!-- VERDICT -->
+<section id="verdict">
+  <div class="sec-h"><span class="num">01 · الخلاصة</span><h2>الخلاصة في صفحة واحدة</h2></div>
+  <div class="grid g4">
+    <div class="card stat"><span>المنتج اللي ننزل بيه</span><b>المحفظة</b><span>والطقم (محفظة + حافظة) كعرض الـ AOV</span></div>
+    <div class="card stat"><span>سعر الإطلاق</span><b class="ltr">329 SAR</b><span>الطقم بـ 499 · شحن مجاني</span></div>
+    <div class="card stat"><span>نقطة التعادل على المحفظة</span><b class="ltr">ROAS 2.09</b><span>CPA تعادل ≈ 158 ريال <span class="tag e">ESTIMATED</span></span></div>
+    <div class="card stat"><span>ميزانية شهر 1</span><b class="ltr">13.5K SAR</b><span>ميتا 300/يوم + تيك توك 150/يوم <span class="tag a">ASSUMPTION</span></span></div>
+  </div>
+  <h3>3 قرارات استراتيجية</h3>
+  <div class="grid g3">
+    <div class="card"><h4>1. الإثبات بالعين بدل الأرقام</h4><p class="mute">مفيش ريفيوهات، فكل إعلان لازم يوري حاجة تتحكم عليها بالعين: خياطة السرج بإبرتين، والحافة بعد التشطيب، والجلد قبل وبعد الـ Patina. ده بيعوّض غياب الـ Social Proof.</p></div>
+    <div class="card"><h4>2. ميتا للبيع، وتيك توك للطلب والمحتوى</h4><p class="mute">ميتا (إنستجرام أساسًا) هو اللي بيجيب الـ Purchase من شريحة 25–45 بدخل عالي. تيك توك بيجيب Reach رخيص (CPM 3–8$) وكومنتات «السعر؟». منه بنطلع أفضل الهوكات وننقلها لميتا.</p></div>
+    <div class="card"><h4>3. ما ننزلش بخصم</h4><p class="mute">الخصم بيحرق تموضع «جلد يعيش سنين». القيمة الزيادة تتقدّم في الشحن المجاني وحفر الأحرف وتقسيط تابي وتمارا والطقم. الضمان 6 شهور متساوي مع السوق، فمش هو الميزة اللي نسوّق بيها.</p></div>
+  </div>
+  <div class="callout good"><strong>أهم حاجة في أول 30 يوم:</strong> نطلع بـ <b>زاوية واحدة كسبانة</b> (CTR أكبر من 1.5% وCPA أقل من 200 ريال)، و<b>أول 30 أوردر حقيقي</b> بيجيبوا أول ريفيوهات بالصور. مش الربح.</div>
+  <div class="callout bad"><strong>Launch Blockers (مفيش صرف قبلهم):</strong> (1) البيكسل والـ CAPI بيبعتوا Purchase بقيمة وعملة صح، (2) صفحة المحفظة فيها ضمان مكتوب وشحن ومدة وتابي وتمارا وFAQ، (3) صفحات السياسات موجودة، (4) أول 12 كرييتيف جاهزين، (5) صور <span class="ltr">Wallet/photo</span> بتاعة Von Baer متشالة نهائيًا ومش داخلة في أي إعلان.</div>
+</section>
+
+<!-- STORE -->
+<section id="store">
+  <div class="sec-h"><span class="num">02 · Store &amp; Funnel Readiness</span><h2>تحليل المتجر: Launch Gate على سلة</h2><p>الموقع ماتفتحش من عندي، فكل بند هنا عليه «يتأكد». علّم على كل بند وانت فاتح الموقع من الموبايل، والصفحة هتحفظ علاماتك على جهازك. بنود الـ «Blocker» لازم تبقى سليمة قبل أي صرف.</p></div>
+  <div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><b>التقدم</b><span class="mono" id="ckCount">0 / 0</span></div><div class="bar"><i id="ckBar" style="width:0%"></i></div></div>
+  <h3>صفحة المنتج (المحفظة أولًا)</h3>
+  <div class="checklist" data-group="pdp">
+    <label class="ck"><input type="checkbox"><span>العنوان بنفس لغة الإعلان: «محفظة وقار — جلد طبيعي كامل الحبيبة، مخيطة يدويًا»<small>لو الإعلان بيقول «خياطة سرج» والصفحة مش بتقولها، يبقى فيه message mismatch.</small></span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>أول صورة: المنتج الحقيقي على خلفية سادة، وبعدها 3 زوايا على الأقل (من جوه، والحافة، والخياطة)<small>من فولدر <span class="ltr">photos befor</span>، مش صور AI بس.</small></span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>صورة في اليد أو الجيب، عشان الحجم يبان<small>أكتر سؤال بعد السعر هو «حجمها كام؟».</small></span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>فيديو 10–15 ثانية على الصفحة: الخياطة والكروت جوه<small>ممكن يتقص من فيديوهات <span class="ltr">SCRIBT/VIDEO</span>.</small></span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>الوصف يبدأ بالفايدة مش المواصفة: «نحيفة في الجيب، وتعيش معك سنين»، وبعدها المواصفات مرة واحدة كإثبات</span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>المواصفات حرفيًا من <span class="ltr">PDP.pdf</span>: 6 فتحات وبتشيل 8–12 كرت، وخياطة سرج بإبرتين، والتشطيب الإيطالي في الحواف<small>ممنوع «خيط إيطالي».</small></span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>المقاسات بالسنتيمتر والوزن<small>مش موجودة في ملف المرجع، لازم تتطلب من العميل.</small></span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>السعر ظاهر من غير scroll، وتحته ويدجت تابي وتمارا «قسّمها على 4 دفعات»</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>الألوان كلها موجودة في المخزون، والصورة بتتغير مع اللون<small>المحفظة فيها 3 ألوان مؤكدة بس، والـ 6 ألوان محتاجين تأكيد من العميل.</small></span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>بلوك ثقة جنب زرار الشراء: «ضمان 6 أشهر على الخياطة والتشطيب · شحن مجاني · رد سريع على واتساب»</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>مدة الشحن مكتوبة كرقم: «يوصلك خلال 2–4 أيام عمل»<small>كلمة «سريع» بس ما تقنعش حد.</small></span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>FAQ بيرد على أكتر 5 اعتراضات (موجودة في القسم 03)</span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>تطبيق ريفيوهات متركب وفاضي بشكل لطيف: «كن أول من يقيّم»، ومتفعّل إنه يطلب صورة بعد الاستلام</span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>زرار «أضف للسلة» ثابت تحت على الموبايل (Sticky ATC)</span><span class="pill p-fix">خلال 30 يوم</span></label>
+    <label class="ck"><input type="checkbox"><span>Cross-sell على الصفحة: «كمّلها بحافظة البطاقات — الطقم بـ 499»</span><span class="pill p-fix">قبل الإطلاق</span></label>
+  </div>
+  <h3>السلة والشيك أوت</h3>
+  <div class="checklist" data-group="checkout">
+    <label class="ck"><input type="checkbox"><span>طرق الدفع: مدى وApple Pay وفيزا وتابي وتمارا<small>Apple Pay ومدى أهم اتنين على الموبايل في السعودية.</small></span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>COD: تقرار تفعيله (التوصية في القسم 05)</span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>مفيش رسوم بتظهر فجأة في آخر خطوة (شحن أو COD)</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>عدد الخطوات والحقول: اكتب العدد وانت بتجرب. الهدف خطوة واحدة بعد السلة، ورقم الجوال يتقبل بصيغة <span class="ltr">05XXXXXXXX</span></span><span class="pill p-check">يتأكد</span></label>
+    <label class="ck"><input type="checkbox"><span>استرجاع السلات المتروكة شغال (رسالة واتساب أو SMS من سلة بعد ساعة)</span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>صفحة الشكر ورسالة تأكيد على واتساب فيها رقم الطلب ومدة التوصيل</span><span class="pill p-fix">قبل الإطلاق</span></label>
+  </div>
+  <h3>تقني وثقة وتشغيل</h3>
+  <div class="checklist" data-group="tech">
+    <label class="ck"><input type="checkbox"><span>سرعة صفحة المنتج على الموبايل أقل من 3 ثواني (PageSpeed Insights). اكتب الرقم.</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>اتجرّب على جوال حقيقي، آيفون وأندرويد، مش من الكمبيوتر</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>العربي RTL سليم، والعملة ريال، ومفيش صفحات 404</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>صفحات السياسات: الاسترجاع (عدد الأيام) والشحن والخصوصية والضمان<small>مطلوبة لصحة الأكاونت الإعلاني كمان.</small></span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>صفحة «من نحن» فيها قصة الصانع في جملتين وصورة يد بتخيط</span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>زرار واتساب عائم بيوصل لرقم بيرد خلال ساعة في أوقات الإعلانات</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>الإنستجرام والتيك توك متربطين ومنشور عليهم 9 بوستات على الأقل قبل الإطلاق</span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>توثيق السجل التجاري أو معروف على سلة ظاهر في الفوتر</span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>المخزون: يكفي 50 أوردر على الأقل من المحفظة باللون الأسود</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>شركة الشحن متفق معاها على SLA مكتوب (مدة وتكلفة لكل منطقة)</span><span class="pill p-fix">قبل الإطلاق</span></label>
+    <label class="ck"><input type="checkbox"><span>حد مسؤول عن الواتساب والدايركت من 12 الضهر لـ 12 بالليل، ودي ساعات الإعلانات الأعلى</span><span class="pill p-fix">قبل الإطلاق</span></label>
+  </div>
+  <div class="callout"><strong>أعلى 5 إصلاحات تأثيرًا على التحويل <span class="tag a">ASSUMPTION</span>:</strong> (1) بلوك الضمان والشحن والتقسيط جنب الزرار: +15–25% نسبيًا. (2) فيديو الخياطة على الصفحة: +10–20%. (3) Apple Pay ومدى بخطوة واحدة: +10–15%. (4) FAQ الاعتراضات: +5–10%. (5) Cross-sell الطقم: الـ AOV يزيد 8–15%. دي تقديرات من نمط متاجر DTC مشابهة، مش بيانات وقار. هتتقاس بعد أول 1,000 زيارة.</div>
+</section>
+
+<!-- MARKET -->
+<section id="market">
+  <div class="sec-h"><span class="num">03 · السوق</span><h2>السوق والمنافسين وصوت العميل</h2><p>نفس الفرضية اللي في ملفك، بس اتأكدنا منها من السوق: فيه فجوة واضحة بين الجلد الرخيص والبراندات العالمية، ومفيش براند سعودي واضح فيها.</p></div>
+  <h3>خريطة الأسعار (محفظة رجالي، بالريال)</h3>
+  <div class="card">
+    <div class="price-row"><span>أمازون / نون (جلد عادي)</span><div class="scale"><span style="right:calc(23/700*100%);width:calc((176-23)/700*100%);background:#6b5a4a;color:var(--fg)">23–176</span></div></div>
+    <div class="price-row"><span>Secrid / Bellroy</span><div class="scale"><span style="right:calc(206/700*100%);width:calc((450-206)/700*100%);background:#8a7764">206–450</span></div></div>
+    <div class="price-row"><span>Ekster</span><div class="scale"><span style="right:calc(259/700*100%);width:calc((371-259)/700*100%);background:#8a7764">259–371</span></div></div>
+    <div class="price-row"><span><b>وقار (الإطلاق)</b></span><div class="scale"><span style="right:calc(329/700*100%);width:calc(36/700*100%);min-width:44px;background:var(--accent)">329</span></div></div>
+    <div class="price-row"><span>Harber London</span><div class="scale"><span style="right:calc(521/700*100%);width:calc((671-521)/700*100%);background:#a89580">521–671</span></div></div>
+    <div class="legend"><span>المقياس من 0 لـ 700 ريال. Montblanc بيبدأ من حوالي 950 ريال، يعني برا الرسمة.</span><span>المصادر: مواقع البراندات من ملف المرجع <span class="tag v">VERIFIED</span>، وأسعار أمازون ونون من بحث 4 أكتوبر 2026 <span class="tag v">VERIFIED</span>.</span></div>
+  </div>
+  <h3>المنافسين حسب النوع</h3>
+  <div class="tw"><table>
+    <thead><tr><th>المنافس</th><th>النوع</th><th>التموضع</th><th>نقطة قوته</th><th>نقطة ضعفه اللي نستغلها</th><th>إعلانات ميتا</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td><b>Harber London</b></td><td>مباشر · Premium</td><td>Full Grain + Handmade + Patina</td><td>نفس القصة بالظبط، وريفيوهات بالآلاف</td><td>«غالي على الاسم»، وخدمة عملاء ضعيفة، وجمارك وتأخير شحن للسعودية</td><td class="a">لازم تتأكد يدويًا*</td></tr>
+      <tr><td>Bellroy</td><td>Premium واسع الانتشار</td><td>نحافة وتنظيم</td><td>موجود على نمشي، وتصوير نضيف</td><td>«الجلد باظ في شهر» و«الحواف بتتآكل»، والضمان بيتلغي بسهولة</td><td class="a">لازم تتأكد يدويًا*</td></tr>
+      <tr><td>Ekster / Ridge</td><td>غير مباشر · Smart wallet</td><td>تقنية وألومنيوم</td><td>ميكانيزم الكروت والـ RFID</td><td>بيهاجموا الجلد نفسه. إحنا بنرد: «الجلد مو المشكلة»</td><td class="a">لازم تتأكد يدويًا*</td></tr>
+      <tr><td>Secrid</td><td>غير مباشر</td><td>وظيفي، هولندي</td><td>«عندي من 10 سنين»</td><td>شكله تقني مش فخم، وخدمة العملاء «a joke»</td><td class="a">لازم تتأكد يدويًا*</td></tr>
+      <tr><td>Elegant Leather</td><td>محلي · ناشئ</td><td>«ماركة سعودية تنافس العالمية» بجلد يدوي</td><td>محلي وعربي</td><td>Not Publicly Available. لازم نشوف إعلاناته وأسعاره</td><td class="a">لازم تتأكد يدويًا*</td></tr>
+      <tr><td>أمازون / نون / متاجر سلة صغيرة</td><td>Budget · Commodity</td><td>«جلد طبيعي» بسعر 23–176</td><td>السعر</td><td>مفيش قصة ولا ضمان ولا حرفة ظاهرة. هنا بيوصل اعتراض «ليه أدفع 329؟»</td><td class="mute">—</td></tr>
+    </tbody></table></div>
+  <div class="callout warn"><strong>* مكتبة إعلانات ميتا مقفولة من السيرفر.</strong> ده Module إجباري في الفريمورك بتاعك، فابعتلي سكرينات منه أو افتح الشبكة لـ <span class="ltr">facebook.com</span>. الخطوات اليدوية (15 دقيقة): افتح Ad Library، الدولة Saudi Arabia، وابحث بالكلمات دي واحدة واحدة: <span class="ltr">محفظة جلد طبيعي · جلد طبيعي يدوي · حافظة بطاقات · سير ساعة جلد · Harber · Bellroy · Ekster</span>. لكل نتيجة سجّل: عدد الإعلانات النشطة، وأقدم إعلان شغال (أكتر من 30 يوم يبقى كسبان)، والفورمات، والهوك في أول سطر، والوجهة (موقع ولا واتساب). وأي منافس عنده صفر إعلانات، ده في حد ذاته finding.</div>
+
+  <h3>صوت العميل → فين نرد عليه</h3>
+  <div class="tw"><table>
+    <thead><tr><th>الاعتراض / الألم</th><th>التكرار</th><th>الدليل</th><th>ردنا</th><th>فين يتعرض</th></tr></thead>
+    <tbody>
+      <tr><td>«السعر غلط مقارنة بالجودة»</td><td class="n">عالي</td><td>Harber · Trustpilot / Bellroy</td><td>نوريه الفرق بالعين: خياطة سرج قدام خياطة ماكينة، وحافة متشطبة قدام حافة مقصوصة. وتقسيط 4 × 82 ريال.</td><td>الإعلان (أول 8 ثواني) + الصفحة</td></tr>
+      <tr><td>«الحواف بتتقشر بعد شهور»</td><td class="n">متوسط–عالي</td><td>Bellroy · WorthEPenny</td><td>«الحواف متشطبة يدويًا بتشطيب إيطالي» مع لقطة ماكرو للحافة.</td><td>الإعلان + صورة 3 في الجاليري</td></tr>
+      <tr><td>«الجلد انشق والخياطة اتفكت»</td><td class="n">متوسط</td><td>Bellroy · Thingtesting</td><td>«تنقطع غرزة؟ الباقي ثابت»، وده ديمو خياطة السرج.</td><td>الإعلان (Hero) + الـ FAQ</td></tr>
+      <tr><td>«الضمان بيتلغي»</td><td class="n">عالي</td><td>Bellroy · CouponsScout</td><td>ضمان 6 أشهر <b>مكتوب بالتفصيل</b>: بيشمل إيه وما بيشملش إيه، والمطالبة على واتساب.</td><td>الصفحة + صفحة الضمان</td></tr>
+      <tr><td>«الشحن طويل وفيه جمارك»</td><td class="n">متوسط</td><td>Harber · Collected.Reviews</td><td>«شحن من داخل المملكة — بدون جمارك — يوصلك خلال X أيام» (X من العميل) <span class="tag a">ASSUMPTION</span></td><td>الإعلان (سطر) + الصفحة</td></tr>
+      <tr><td>«كم بطاقة تشيل؟»</td><td class="n">سؤال متكرر</td><td>Harber reviews</td><td>«6 فتحات وتشيل من 8 لـ 12 كرت»، ونوريها مليانة.</td><td>الصفحة + الـ FAQ + رد الكومنتات</td></tr>
+    </tbody></table></div>
+  <div class="grid g2">
+    <div class="card"><h4>مستوى الوعي للترافيك البارد</h4><p class="mute"><b>Solution Aware:</b> عارف إن فيه محافظ جلد كويسة، بس مش عارف وقار. يعني الإعلان البارد ما يبدأش بشرح المنتج. يبدأ بالفرق: «ليه محفظتك القديمة اتفككت؟» أو بلقطة الحرفة. والـ <b>Problem Aware</b> (اللي محفظته باظت) أرخص شريحة على تيك توك.</p></div>
+    <div class="card"><h4>العميل</h4><p class="mute">رجال 25–45، دخل 10–30 ألف، الرياض وجدة والدمام والخبر <span class="tag v">من ملف المرجع</span>. موبايل في حوالي 90% من الوقت <span class="tag a">ASSUMPTION</span>. أعلى تفاعل من 9 بالليل لـ 1 بعد نص الليل، وبعد العصر في الويك إند <span class="tag a">ASSUMPTION</span>. الدفع: مدى وApple Pay، وتابي وتمارا للقطع فوق 250 ريال.</p></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="sec-h"><span class="num">04 · التسعير</span><h2>التسعير اللي ننزل بيه</h2><p>اخترت رقم واحد من كل نطاق في ملف التسعير المعتمد (<span class="ltr">analysis_waqar_by_hazem.html</span>)، ومعاه الـ CPA الأقصى اللي الرقم ده يستحمله. السعر اللي ما يستحملش إعلانات مدفوعة مش سعر صالح.</p></div>
+  <div class="tw"><table>
+    <thead><tr><th>المنتج</th><th>سعر الإطلاق</th><th>بعد 50+ ريفيو</th><th>تقسيط ×4</th><th>CPA التعادل</th><th>ROAS التعادل</th><th>ليه الرقم ده</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td><b>المحفظة</b> (Hero)</td><td class="n ltr">329</td><td class="n ltr">369</td><td class="n ltr">≈ 82</td><td class="n ltr">≈ 158</td><td class="n ltr">2.09</td><td>تحت حاجز الـ 350 النفسي، وأرخص من Harber بـ 37%، وفوق أغلى أمازون بـ 1.9×.</td></tr>
+      <tr><td><b>طقم وقار</b> (محفظة + حافظة)</td><td class="n ltr">499</td><td class="n ltr">569</td><td class="n ltr">≈ 125</td><td class="n ltr">≈ 244</td><td class="n ltr">2.04</td><td>بتوفّر 59 ريال (11%) من غير ما تسميه خصم. وهو أعلى CPA ممكن نستحمله في الأكاونت.</td></tr>
+      <tr><td>حافظة البطاقات</td><td class="n ltr">229</td><td class="n ltr">259</td><td class="n ltr">≈ 57</td><td class="n ltr">≈ 99</td><td class="n ltr">2.31</td><td>منتج دخول. <b>ما يتعملهوش إعلان بارد لوحده</b>، لأن هامشه ما يستحملش CPA السوق.</td></tr>
+      <tr><td>استراب الساعة</td><td class="n ltr">279</td><td class="n ltr">319</td><td class="n ltr">≈ 70</td><td class="n ltr">≈ 131</td><td class="n ltr">2.13</td><td>أرخص من Pin &amp; Buckle وBullstrap (356–521). بيتعمله إعلان بس لما الموديلات المتوافقة تتأكد.</td></tr>
+      <tr><td>حافظة الجواز</td><td class="n ltr">359</td><td class="n ltr">399</td><td class="n ltr">≈ 90</td><td class="n ltr">≈ 178</td><td class="n ltr">2.02</td><td>نادر محليًا. موسمه قبل الصيف وإجازات منتصف السنة، وطقم المسافر (جواز + حافظة) بـ 529.</td></tr>
+    </tbody></table></div>
+  <p class="mute">كل الأسعار بالريال وشاملة ضريبة القيمة المضافة 15%. الـ CPA والـ ROAS متحسوبين في القسم 06 <span class="tag e">ESTIMATED</span>.</p>
+  <div class="callout"><strong>ليه 329 مش 299؟</strong> 299 بتوصّل «سعر عرض»، وبتقرّب المحفظة من فئة الجلد العادي (90–150) اللي ملفك محذّر منها. و349 قريبة من Bellroy المعروف من غير ما يكون عندنا ريفيوهات تدعمها. 329 بتسيب مساحة نرفع منها 12% بعد الريفيوهات وتبان «طبيعية». ومع تابي بتبقى «82 ريال × 4»، وده أسهل في الإعلان.</div>
+</section>
+
+<!-- OFFER -->
+<section id="offer">
+  <div class="sec-h"><span class="num">05 · العرض</span><h2>العرض: معادلة Hormozi وسلّم التيست</h2></div>
+  <div class="grid g2">
+    <div class="card"><h4>عرض الإطلاق (Offer A)</h4><ul>
+      <li><b>المنتج:</b> محفظة وقار بـ 329.</li>
+      <li><b>شحن مجاني</b> لكل الطلبات في أول 60 يوم، وهو داخل في الحسبة.</li>
+      <li><b>حفر الأحرف مجانًا</b> (حرفين) <span class="tag a">لو العميل وافق</span>. ده أقوى bonus عندنا لأنه بيخلّي المنتج «بتاعك» وبيقفل باب الاسترجاع.</li>
+      <li><b>تقسيط:</b> تابي وتمارا 4 دفعات.</li>
+      <li><b>ضمان 6 أشهر مكتوب</b>، ومطالبته على واتساب.</li>
+      <li><b>التغليف:</b> بوكس وقار + كارت «اللي يعرف، يعرف».</li>
+    </ul></div>
+    <div class="card"><h4>تقييم Value Equation</h4>
+      <div class="tw" style="margin:0;border:0"><table style="min-width:0">
+        <tbody>
+        <tr><td>Dream Outcome (محفظة تعيش 10 سنين وتحلو)</td><td class="n">8/10</td></tr>
+        <tr><td>Likelihood (الثقة إنها هتحصل)</td><td class="n">4/10 ← <b>أضعف نقطة</b></td></tr>
+        <tr><td>Time Delay (يوصل امتى)</td><td class="n">6/10 ← لازم رقم أيام</td></tr>
+        <tr><td>Effort (سهولة الشراء)</td><td class="n">7/10 ← Apple Pay وتقسيط</td></tr>
+        </tbody></table></div>
+      <p class="mute" style="margin-top:10px">يعني الشغل كله على رفع الـ <b>Likelihood</b>: ديمو الخياطة، وفيديو الصانع، والضمان المكتوب، والريفيوهات الأولى بالصور.</p>
+    </div>
+  </div>
+  <h3>سلّم التيست (Offer Testing Ladder)</h3>
+  <div class="tw"><table>
+    <thead><tr><th>الترتيب</th><th>العرض</th><th>بيبدأ امتى</th><th>إمتى نبدّل</th><th>أثره على الهامش</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td>A</td><td>محفظة 329 + شحن مجاني + حفر أحرف + تقسيط</td><td>اليوم 1</td><td>لو الـ CTR كويس (≥ 1.3%) والـ ATC كويس، بس الـ CPA أعلى من 250 بعد 3,000 ريال صرف: نجرب B</td><td>صفر خصم. الحفر بيكلّف حوالي 5–10 ريال <span class="tag a">ASSUMPTION</span></td></tr>
+      <tr><td>B</td><td>طقم وقار 499 كعرض رئيسي في الإعلان</td><td>اليوم 15 أو بالقاعدة اللي فوق</td><td>لو أكتر من 30% من الأوردرات طقم: يبقى هو الـ Hero</td><td>CPA التعادل يطلع من 158 لـ 244</td></tr>
+      <tr><td>C</td><td>«إصدار الإطلاق»: أول 200 قطعة بكارت مرقّم بإيد الصانع</td><td>الشهر 2</td><td>لو الـ CTR وقع والكرييتيف تعب</td><td>تكلفة الكارت حوالي 3 ريال</td></tr>
+      <tr><td>✗</td><td>خصم 20% أو كود خصم عام</td><td>ممنوع في أول 90 يوم</td><td>—</td><td>بيحرق التموضع وبيعلّم الجمهور يستنى</td></tr>
+    </tbody></table></div>
+  <div class="callout"><strong>COD:</strong> التوصية إنه يتفعل في أول 60 يوم برسوم 15 ريال، والتأكيد يكون على واتساب. ده بيقلل الخوف من براند جديد، والرسوم بتحوّل معظم الناس للدفع المسبق. لو المرتجع (RTO) عدّى 15%، نقفله. وده متراقب أسبوعيًا.</div>
+</section>
+
+<!-- ECONOMICS -->
+<section id="economics">
+  <div class="sec-h"><span class="num">06 · Unit Economics</span><h2>الأرقام: هنكسب إمتى؟</h2><p>كل الأسعار شاملة ضريبة 15%. فإيراد البراند الفعلي هو السعر ÷ 1.15.</p></div>
+  <div class="grid g2">
+<pre class="calc">WALLET @ 329 SAR
+Net of VAT (329 / 1.15)        = 286.1
+COGS  (~23% of 329)  [EST]     =  75.0
+Shipping (free to customer)[A] =  30.0
+Packaging + card        [A]    =  12.0
+Payment fees ~3.5% blend [EST] =  11.5   (mada 1–1.75%, Tabby/Tamara 3–5%)
+---------------------------------------
+Gross profit / order           = 157.6
+Break-even CPA                 = 157.6 SAR
+Break-even ROAS (329/157.6)    =   2.09
+Target CPA (keep 40% of GP)    ≈  95 SAR
+Target ROAS                    ≈   3.5</pre>
+<pre class="calc">BUNDLE @ 499 SAR (wallet + card holder)
+Net of VAT (499 / 1.15)        = 433.9
+COGS (75 + 52)          [EST]  = 127.0
+Shipping                [A]    =  30.0
+Packaging               [A]    =  15.0
+Payment fees 3.5%       [EST]  =  17.5
+---------------------------------------
+Gross profit / order           = 244.4
+Break-even CPA                 = 244.4 SAR
+Break-even ROAS (499/244.4)    =   2.04
+Blended AOV if 30% bundles     = 0.7×329 + 0.3×499 = 380
+Blended break-even CPA         ≈ 183 SAR</pre>
+  </div>
+  <h3>الحقيقة في السوق: الـ CPA هيطلع كام؟</h3>
+<pre class="calc">Meta KSA CPM: $8–15  ≈ 30–56 SAR  [VERIFIED: Gulf benchmark reports 2026]
+Assume CPM 40 SAR                                   [EST]
+
+Scenario      CTR(link)  CPC     Site CVR  CPA        vs break-even 158 / 183 (blended)
+Weak          1.0%       4.00    1.0%      400 SAR    ✗ loses
+Realistic M1  1.3%       3.08    1.5%      205 SAR    ✗ close to blended BE
+Good          1.6%       2.50    2.0%      125 SAR    ✓ profitable
+Strong        2.0%       2.00    2.5%       80 SAR    ✓ target
+
+CPA = CPC / CVR  ·  CPC = CPM / (1000 × CTR)</pre>
+  <div class="callout warn"><strong>الترجمة:</strong> الفرق بين الخسارة والمكسب هو CTR من 1.3 لـ 1.6%، وتحويل من 1.5 لـ 2%. الاتنين في إيدنا: الأول بالهوك، والتاني بالصفحة والثقة. عشان كده القسم 02 (المتجر) والقسم 10 (الكونتنت) أهم من بناء الحملة نفسها.</div>
+  <p class="mute">لو COD اتفعّل: Effective CPA = الصرف ÷ (الأوردرات × نسبة التأكيد × نسبة التوصيل). بنسبة توصيل 85% ونسبة تأكيد 90%، الـ CPA الفعلي = CPA الإجمالي × 1.31. بنعرض الرقمين دايمًا.</p>
+</section>
+
+<!-- TRACKING -->
+<section id="tracking">
+  <div class="sec-h"><span class="num">07 · Tracking</span><h2>التراكينج: يتبني قبل أي صرف</h2></div>
+  <div class="grid g2">
+    <div class="card"><h4>الأساس</h4><ul>
+      <li><b>Business Manager</b> باسم العميل، وانت Partner بصلاحية Admin على الأكاونت والبيكسل والصفحة.</li>
+      <li><b>Domain verification</b> لـ <span class="ltr">waqarleather.com</span> عن طريق DNS TXT.</li>
+      <li><b>ميتا:</b> بيكسل سلة الأصلي + CAPI. يا إما بـ <b>Smart Observer</b> من سلة (بيدعم Meta وTikTok وSnap) <span class="tag v">help.salla.sa</span>، يا إما بـ Server GTM (Stape) لو محتاج تحكم أكتر. اختار واحد بس عشان ما يحصلش تكرار.</li>
+      <li><b>تيك توك:</b> TikTok Pixel + Events API من نفس الأداة.</li>
+      <li><b>Deduplication:</b> نفس <span class="ltr">event_id</span> من المتصفح والسيرفر. بيتأكد من Events Manager، والمفروض يظهر «Deduplicated».</li>
+    </ul></div>
+    <div class="card"><h4>Advanced Matching</h4><ul>
+      <li>بنبعت: الإيميل والجوال والاسم والمدينة والدولة و<span class="ltr">external_id</span> و<span class="ltr">fbc/fbp</span>.</li>
+      <li><b>الجوال:</b> <span class="ltr">05XXXXXXXX → 9665XXXXXXXX</span> (نشيل الصفر ونضيف 966)، وبعدين SHA-256.</li>
+      <li><b>الهدف:</b> Event Match Quality أكبر من أو يساوي 6.0 على الـ Purchase.</li>
+      <li><b>UTM:</b> <span class="ltr">?utm_source=meta&amp;utm_medium=paid&amp;utm_campaign={{campaign.name}}&amp;utm_content={{ad.name}}&amp;utm_term={{adset.name}}</span></li>
+      <li><b>Attribution:</b> 7-day click / 1-day view. ومصدر الحقيقة للإيراد: <b>تحليلات سلة</b>، مش ميتا.</li>
+    </ul></div>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Event</th><th>بيشتغل امتى</th><th>Browser</th><th>CAPI</th><th>Value / Currency</th><th>الاستخدام</th></tr></thead>
+    <tbody>
+      <tr><td class="ltr">ViewContent</td><td>فتح صفحة منتج</td><td>✓</td><td>✓</td><td>سعر المنتج · SAR</td><td>ريتارجتنج 30 يوم</td></tr>
+      <tr><td class="ltr">AddToCart</td><td>إضافة للسلة</td><td>✓</td><td>✓</td><td>✓ · SAR</td><td>تحسين احتياطي لو الـ Purchase قليل</td></tr>
+      <tr><td class="ltr">InitiateCheckout</td><td>دخول الشيك أوت</td><td>✓</td><td>✓</td><td>✓ · SAR</td><td>ريتارجتنج 7 أيام</td></tr>
+      <tr><td class="ltr">AddPaymentInfo</td><td>اختيار طريقة دفع</td><td>✓</td><td>✓</td><td>✓ · SAR</td><td>تشخيص (تابي ولا مدى)</td></tr>
+      <tr class="hl"><td class="ltr">Purchase</td><td>صفحة الشكر</td><td>✓</td><td>✓</td><td>قيمة الطلب بعد الخصم · SAR</td><td><b>الحدث الأساسي للتحسين</b></td></tr>
+      <tr><td class="ltr">Contact</td><td>ضغط زرار واتساب</td><td>✓</td><td>—</td><td>—</td><td>قياس طلب الطمأنة</td></tr>
+    </tbody></table></div>
+  <div class="checklist" data-group="trk">
+    <label class="ck"><input type="checkbox"><span>اتعمل أوردر تجريبي حقيقي، والـ Purchase وصل من المتصفح والسيرفر Deduplicated، والقيمة والعملة صح</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>Events Manager من غير أخطاء Critical، والـ Test Events نضيفة</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>نفس الكلام اتعمل على TikTok Events Manager لـ CompletePayment</span><span class="pill p-block">Blocker</span></label>
+    <label class="ck"><input type="checkbox"><span>الـ UTMs ظاهرة في تحليلات سلة تحت المصدر</span><span class="pill p-fix">قبل الإطلاق</span></label>
+  </div>
+</section>
+
+<!-- META -->
+<section id="meta">
+  <div class="sec-h"><span class="num">08 · Meta</span><h2>ميتا: بناء الحملات</h2><p>هدف أول 30 يوم: <b>نتعلم</b>. يعني نطلع بزاوية كسبانة وأول 30 أوردر. مش هدفنا نسكيل. وأكاونت جديد من غير داتا بيمشي على Broad وكرييتيف قوي، مش على تكديس اهتمامات.</p></div>
+  <div class="callout warn"><strong>حسبة الـ Learning Phase:</strong> الـ ad set محتاج حوالي 50 Purchase في الأسبوع عشان يخرج من الـ Learning. بـ CPA 150 ده محتاج 7,500 ريال في الأسبوع لكل ad set، وده مش متاح. عشان كده: عدد ad sets قليل، وBroad، وتجميع الكسبان بسرعة في CBO واحد. ولو مفيش 10 Purchase في الأسبوع الأول، نبدّل التحسين على AddToCart مؤقتًا ونرجع للـ Purchase أول ما نوصل 15 في الأسبوع.</div>
+  <h3>Build Sheet</h3>
+  <div class="tw"><table>
+    <thead><tr><th>الحملة</th><th>الهدف</th><th>النوع</th><th>يومي</th><th>Ad Sets</th><th>الاستهداف</th><th>Placements</th><th>Optimization</th><th>Bid</th><th>كرييتيف</th><th>تبدأ</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td class="ltr">WQR_SALES_TOF_TEST_WALLET_1026</td><td>Sales</td><td>ABO</td><td class="n ltr">300</td><td>3 × 100<br><small class="mute">كل ad set زاوية</small></td><td>KSA · رجال 24–50 · Broad (من غير اهتمامات) · عربي</td><td>Advantage+ (ريلز وستوريز إنستجرام في المقدمة)</td><td>Purchase</td><td>Highest volume</td><td>4 لكل ad set (هوك مختلف، نفس الزاوية)</td><td>يوم 1</td></tr>
+      <tr><td class="ltr">WQR_SALES_TOF_SCALE_ASC_1026</td><td>Advantage+ Sales</td><td>CBO</td><td class="n ltr">250 → يزيد</td><td>1 (ASC)</td><td>KSA · Existing customers cap 0%</td><td>Advantage+</td><td>Purchase</td><td>Highest volume ← Cost cap = Target CPA بعد 30 Purchase</td><td>الكسبانين بس (3–6)</td><td>يوم 10–14</td></tr>
+      <tr><td class="ltr">WQR_SALES_BOF_RT_ALL_1026</td><td>Sales</td><td>ABO</td><td class="n ltr">50</td><td>1</td><td>ATC + IC 14 يوم · زوار الموقع 30 يوم · متفاعلين IG 60 يوم · مستبعد: المشترين 180 يوم</td><td>Advantage+</td><td>Purchase</td><td>Highest volume</td><td>3: ديمو الضمان، والطقم، وFAQ «كم بطاقة؟»</td><td>لما الجمهور يعدّي 2,000</td></tr>
+    </tbody></table></div>
+  <h3>زوايا الـ 3 Ad Sets في التيست</h3>
+  <div class="grid g3">
+    <div class="card"><h4>AS1 · الحرفة (Proof)</h4><p class="mute">خياطة السرج بإبرتين قدام خياطة الماكينة. «تنقطع غرزة؟ الباقي ثابت». دي أقوى زاوية متوقعة لأنها بتعالج الـ Likelihood.</p></div>
+    <div class="card"><h4>AS2 · الهوية (Ownable)</h4><p class="mute">«الشماغ ما يليق إلا الطبيعي»: زاوية ثقافية محدش من المنافسين العالميين يقدر يقولها. ممنوع العلم والشعار الرسمي.</p></div>
+    <div class="card"><h4>AS3 · الزمن (Patina)</h4><p class="mute">«يكبر معك ويزيد جمال»: قبل وبعد. ولو مفيش صور Patina حقيقية لسه، الزاوية دي تتبدّل بـ <b>النحافة والتنظيم</b> لحد ما برنامج التعتيق يطلّع صور.</p></div>
+  </div>
+  <h3>Exclusion Map</h3>
+  <div class="tw"><table>
+    <thead><tr><th>الجمهور</th><th>TEST</th><th>ASC</th><th>RT</th></tr></thead>
+    <tbody>
+      <tr><td>المشترين 180 يوم</td><td>مستبعد</td><td>Existing customers cap 0%</td><td>مستبعد</td></tr>
+      <tr><td>ATC / IC 14 يوم</td><td>مستبعد</td><td>— (ASC بيحكم نفسه)</td><td>مستهدف</td></tr>
+      <tr><td>زوار الموقع 30 يوم</td><td>—</td><td>—</td><td>مستهدف</td></tr>
+    </tbody></table></div>
+  <h3>التسمية</h3>
+<pre class="calc">Campaign: WQR_[Objective]_[Funnel]_[Type]_[Product]_[MMYY]   → WQR_SALES_TOF_TEST_WALLET_1026
+Ad Set:   [Audience]_[Angle]_[Placement]_[Budget]           → BROAD_CRAFT_ADV_100
+Ad:       [Format]_[Angle]_[Hook#]_[Version]_[DDMM]          → REEL_CRAFT_H03_V1_0510</pre>
+  <h3>تسلسل الإطلاق</h3>
+  <div class="grid g4">
+    <div class="card"><h4>يوم 0–3</h4><p class="mute">حملة TEST بس. ممنوع تعديل الميزانية أو الاستهداف. المسموح بس إنك تقفل إعلان عدّى قاعدة الـ Kill.</p></div>
+    <div class="card"><h4>يوم 4–7</h4><p class="mute">أول قراية: Hook rate وCTR وCPC وATC لكل إعلان. نقفل الضعيف، وننزّل 2 تنويعات على أحسن هوك.</p></div>
+    <div class="card"><h4>أسبوع 2</h4><p class="mute">الزاوية اللي كسبت تاخد 60% من الميزانية. نفتح ASC بالكسبانين. الريتارجت يبدأ لو الجمهور كفاية.</p></div>
+    <div class="card"><h4>أسبوع 3–4</h4><p class="mute">أول سكيل: ASC يزيد 20% كل 3 أيام بالقاعدة. وفي TEST: 4 كرييتيف جداد كل أسبوع.</p></div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h4>قواعد الـ Kill (بالريال)</h4><ul>
+      <li><b>إعلان:</b> صرف 60 ريال، والـ CTR (link) أقل من 0.8%، أو Hook rate أقل من 20% ← يتقفل.</li>
+      <li><b>إعلان:</b> صرف 150 ريال من غير ولا ATC ← يتقفل.</li>
+      <li><b>إعلان:</b> صرف 400 ريال (حوالي 2.5× CPA التعادل) من غير Purchase ← يتقفل.</li>
+      <li><b>Ad set:</b> 3 أيام والـ CPA أعلى من 300 ← الميزانية تتنقل.</li>
+      <li><b>Frequency:</b> أعلى من 3 في 7 أيام على البارد ← كرييتيف جديد.</li>
+    </ul></div>
+    <div class="card"><h4>قواعد الـ Scale</h4><ul>
+      <li><b>Vertical:</b> لو الـ CPA أقل من أو يساوي 150 لمدة 3 أيام ورا بعض، بـ 5 Purchase على الأقل ← +20% كل 72 ساعة.</li>
+      <li><b>Horizontal:</b> لو إعلان جاب 10+ Purchase بـ CPA أقل من 130 ← يتنقل لـ ASC كـ Post ID عشان يحتفظ بالتفاعل.</li>
+      <li><b>Cost cap:</b> بعد 30 Purchase نحط cap = 140 (Target CPA في الأول، بعدين ينزل لـ 120).</li>
+      <li>ممنوع تزوّد أكتر من 20% مرة واحدة، وممنوع تعدّل جوه الـ Learning.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- TIKTOK -->
+<section id="tiktok">
+  <div class="sec-h"><span class="num">09 · TikTok</span><h2>تيك توك: بيتعمله إيه بالظبط</h2><p>CPM تيك توك في السعودية 3–8$ <span class="tag v">VERIFIED: benchmarks 2026</span>، يعني تقريبًا ربع ميتا. بس المشتري هناك أصغر وأقل استعداد يدفع 329 من أول مرة. عشان كده دوره عندنا: ريتش رخيص ومحتوى أورجانيك يتحوّل Spark Ads، ومعمل نختبر فيه الهوكات. الشراء بنقيسه، بس مش هو الحكم الوحيد.</p></div>
+  <div class="tw"><table>
+    <thead><tr><th>الحملة</th><th>الهدف</th><th>يومي</th><th>Ad Groups</th><th>الاستهداف</th><th>Optimization</th><th>الكرييتيف</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td class="ltr">WQR_TT_WEB_TEST_1026</td><td>Website conversions</td><td class="n ltr">150</td><td>2 × 75 (الحرفة / الهوية)</td><td>KSA · رجال 25–44 · Broad</td><td>CompletePayment. ولو أقل من 10 في الأسبوع ← AddToCart</td><td>3 لكل جروب: نيتف 9:16، صوت حقيقي، ومن غير لوجو في أول ثانيتين</td></tr>
+      <tr><td class="ltr">WQR_TT_SPARK_1026</td><td>Website conversions</td><td class="n ltr">من الأسبوع 3</td><td>1</td><td>Broad</td><td>CompletePayment</td><td>Spark Ads لأعلى 2 بوستات أورجانيك في الكومنتات والسيف</td></tr>
+    </tbody></table></div>
+  <div class="grid g2">
+    <div class="card"><h4>قواعد تيك توك</h4><ul>
+      <li>الكومنت «السعر؟» ده هدف مش مشكلة. الكابشن من غير سعر (قاعدة الريل اللي جاب 1.1M)، والرد بيتثبت: «329 وتقدر تقسّمها، التفاصيل في البايو».</li>
+      <li>الكرييتيف يتغير كل 7–10 أيام. تيك توك بيتعب أسرع من ميتا.</li>
+      <li>Kill: صرف 50 ريال وWatch 2s أقل من 25%، أو CTR أقل من 0.6% ← يتقفل.</li>
+      <li>الهوك اللي يجيب 2-sec view أعلى من 35% يتنقل لميتا كإعلان جديد.</li>
+    </ul></div>
+    <div class="card"><h4>Snapchat (الشهر 2، مش دلوقتي)</h4><p class="mute">سناب في السعودية قوي جدًا في الشريحة دي، وسلة بتدعم Snap Pixel وCAPI. بس فتح 3 منصات بميزانية 13.5K هيفرّق الداتا. يتفتح بـ 100 ريال يوميًا في الشهر 2، ولو ميتا جاب CPA أقل من 150.</p></div>
+  </div>
+</section>
+
+<!-- CREATIVE -->
+<section id="creative">
+  <div class="sec-h"><span class="num">10 · Creative</span><h2>الكونتنت: الزوايا والهوكات والكمية</h2><p>القواعد من ملفك ثابتة: CTA واحد «اطلب من وقار»، والمواصفة تتقال مرة واحدة كإثبات، والتنوع يكون في الفورمات والسياق مش في الكلمات بس، وممنوع «خيط إيطالي»، وممنوع العلم والشعار الرسمي.</p></div>
+  <h3>بنك الزوايا</h3>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>الزاوية</th><th>Trigger</th><th>الوعي</th><th>الوعد</th><th>الاعتراض اللي بتقتله</th><th>الإثبات المطلوب</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td>1</td><td>غرزة السرج</td><td>Authority / Proof</td><td>Solution</td><td>ما تتفكك</td><td>«الخياطة بتنسل»</td><td>ماكرو إبرتين + قص غرزة</td></tr>
+      <tr><td>2</td><td>الجلد مو المشكلة</td><td>Contrarian</td><td>Solution</td><td>الجلد الصح يعيش</td><td>«الجلد بيتلف»</td><td>مقارنة جلد Full Grain بجلد Corrected</td></tr>
+      <tr class="hl"><td>3</td><td>الشماغ ما يليق إلا الطبيعي</td><td>Identity</td><td>Unaware → Solution</td><td>فخامة هادية تليق بك</td><td>«ليه أدفع أكتر؟»</td><td>لقطة لايف ستايل: ثوب وشماغ ومحفظة</td></tr>
+      <tr><td>4</td><td>يكبر معك</td><td>Transformation</td><td>Solution</td><td>كل سنة أحلى</td><td>«هتقدم»</td><td>قبل وبعد الـ Patina</td></tr>
+      <tr><td>5</td><td>الحافة</td><td>Proof / Detail</td><td>Product</td><td>ما تتقشر</td><td>«الحواف بتتآكل»</td><td>ماكرو التشطيب</td></tr>
+      <tr><td>6</td><td>8–12 كرت في محفظة نحيفة</td><td>Convenience</td><td>Problem</td><td>جيب خفيف</td><td>«كم تشيل؟»</td><td>تعبئة لايف بالكروت</td></tr>
+      <tr><td>7</td><td>ادفع مرة وعيش سنين</td><td>Value / Math</td><td>Product</td><td>82 × 4 ولا محفظة كل سنة</td><td>«غالي»</td><td>جرافيك حسبة</td></tr>
+      <tr><td>8</td><td>هدية تنحفر باسمه</td><td>Love / Status</td><td>Unaware</td><td>هدية ما تتنسى</td><td>«مش عارف أهادي إيه»</td><td>لقطة الحفر <span class="tag a">لو متاح</span></td></tr>
+      <tr><td>9</td><td>إيد الصانع</td><td>Trust / Story</td><td>Unaware</td><td>في إنسان وراها</td><td>«مين انتم؟»</td><td>الصانع بصوته <span class="tag a">موافقة</span></td></tr>
+      <tr><td>10</td><td>الطقم</td><td>Bundle / Value</td><td>Most aware</td><td>اثنين بـ 499</td><td>تردد الإضافة</td><td>فلات لاي</td></tr>
+    </tbody></table></div>
+  <h3>بنك الهوكات (بالسعودي)</h3>
+  <div class="hook-list">
+    <div class="hook"><i>Problem</i><span>محفظتك الجلد تفككت من الطرف؟ هذي مو مشكلة جلد.</span></div>
+    <div class="hook"><i>Contrarian</i><span>الجلد مو المشكلة. الجلد المعمول غلط هو المشكلة.</span></div>
+    <div class="hook"><i>Demo</i><span>قصّيت غرزة من المحفظة… وشوف وش صار.</span></div>
+    <div class="hook"><i>Curiosity</i><span>ليه خياطة الماكينة تنسل كلها لو انقطعت غرزة وحدة؟</span></div>
+    <div class="hook"><i>Identity</i><span>الشماغ ما يليق إلا الطبيعي.</span></div>
+    <div class="hook"><i>POV</i><span>POV: طلّعت محفظتك قدام الحساب وانسأل «من وين؟»</span></div>
+    <div class="hook"><i>Question</i><span>كم بطاقة تشيل محفظتك؟ هذي تشيل 12 وما تنتفخ.</span></div>
+    <div class="hook"><i>Transformation</i><span>نفس المحفظة. أول يوم… وبعد ستة أشهر.</span></div>
+    <div class="hook"><i>Detail</i><span>شوف الحافة. هنا تعرف الجلد الرخيص من الغالي.</span></div>
+    <div class="hook"><i>Math</i><span>محفظة كل سنة بـ 100… ولا وحدة بـ 329 تعيش معك عشر؟</span></div>
+    <div class="hook"><i>Story</i><span>كل غرزة هنا مرّت بإبرتين ويد وحدة.</span></div>
+    <div class="hook"><i>Contrarian</i><span>لا تشتري محفظة جلد قبل ما تشوف هالمقطع.</span></div>
+    <div class="hook"><i>Social</i><span>سألوني في الكومنتات «السعر؟»… هذا جوابي.</span></div>
+    <div class="hook"><i>Gift</i><span>تبي هدية لأبوك ما تنرمي في الدرج؟</span></div>
+    <div class="hook"><i>Shock</i><span>محفظة بـ 600 من برّا… وهذي بنفس الجلد وبأقل بكثير.</span></div>
+    <div class="hook"><i>POV</i><span>لما تكون تعرف بالجلد وتشوف تشطيب الحواف.</span></div>
+    <div class="hook"><i>Problem</i><span>جيبك منفوخ من كروت ما تستخدمها؟</span></div>
+    <div class="hook"><i>Detail</i><span>اللي يعرف، يعرف.</span></div>
+    <div class="hook"><i>Question</i><span>جلد طبيعي ولا «جلد طبيعي»؟ الفرق في هالثلاث ثواني.</span></div>
+    <div class="hook"><i>Transformation</i><span>الجلد هذا يتغير لونه معك… وهذا المقصود.</span></div>
+    <div class="hook"><i>Offer</i><span>اثنين من وقار: محفظة وحافظة بطاقات بـ 499.</span></div>
+    <div class="hook"><i>Story</i><span>سوينا المحفظة اللي كنا ندوّرها وما لقيناها.</span></div>
+    <div class="hook"><i>Curiosity</i><span>هذا الصوت هو أهم شي في المحفظة. (صوت شد الغرزة)</span></div>
+    <div class="hook"><i>Identity</i><span>فخامة هادية. بدون لوقو كبير.</span></div>
+    <div class="hook"><i>Demo</i><span>عبّيتها 12 بطاقة وفلوس… وشوف سمكها.</span></div>
+  </div>
+  <p class="mute" style="margin-top:10px">ملاحظة: هوك «بـ 600 من برّا» بيذكر 600 كرقم تقريبي لـ Harber (521–671 <span class="tag v">VERIFIED</span>). ما تذكرش اسم براند منافس في الإعلان.</p>
+  <h3>الكمية الشهرية</h3>
+  <div class="tw"><table>
+    <thead><tr><th>الشهر</th><th>ستاتيك</th><th>فيديو / UGC</th><th>كاروسيل</th><th>المجموع الجديد</th><th>تنويعات الكسبان</th><th>ملاحظة</th></tr></thead>
+    <tbody>
+      <tr><td>شهر 1</td><td class="n">6</td><td class="n">10</td><td class="n">2</td><td class="n"><b>18</b></td><td class="n">4</td><td>12 منهم جاهزين قبل يوم 1 (المذكورين في الـ Blockers)</td></tr>
+      <tr><td>شهر 2</td><td class="n">6</td><td class="n">10</td><td class="n">2</td><td class="n"><b>18</b></td><td class="n">8</td><td>أول UGC بريفيوهات حقيقية + فيديو الصانع</td></tr>
+      <tr><td>شهر 3</td><td class="n">6</td><td class="n">12</td><td class="n">2</td><td class="n"><b>20</b></td><td class="n">10</td><td>Patina شهرين حقيقيين + محتوى موسم رمضان</td></tr>
+    </tbody></table></div>
+  <p class="mute">الحسبة: 300 ريال يوميًا على التيست = 2,100 في الأسبوع. وكل كرييتيف محتاج حوالي 150 ريال عشان نحكم عليه، يعني 4–5 كرييتيف جداد في الأسبوع. ده مقدور عليه بالـ AI (Veo وHiggsfield) زائد التصوير اللي عند العميل.</p>
+</section>
+
+<!-- SCRIPTS -->
+<section id="scripts">
+  <div class="sec-h"><span class="num">11 · Scripts</span><h2>6 سكريبتات جاهزة للتصوير</h2><p>3 لميتا (ريلز إنستجرام) و3 نيتف لتيك توك. كلها بالسعودي، وموزعة على أقوى 3 زوايا.</p></div>
+  <div class="grid g2">
+    <article class="script">
+      <div class="script-h"><h4>S1 · قصّ الغرزة (ميتا · الحرفة)</h4><span class="mono mute">20–25 ث · موبايل + ماكرو · ~0 تكلفة</span></div>
+      <div class="tw" style="margin:0;border:0;border-radius:0"><table><tbody>
+        <tr><td>0–3s</td><td><b>بصوت:</b> «قصّيت غرزة من المحفظة… وشوف وش صار.» <br><span class="mute">لقطة: مقص صغير بيقص غرزة واحدة في الحافة. ماكرو.</span></td></tr>
+        <tr><td>3–8s</td><td>«خياطة الماكينة غرزة متسلسلة — تنقطع وحدة، تنسل الباقي كلها.» <span class="mute">(سبليت: محفظة رخيصة الخيط فيها بيتسحب)</span></td></tr>
+        <tr><td>8–16s</td><td>«إحنا نخيط سرج بإبرتين. كل غرزة مقفلة بنفسها. تنقطع وحدة؟ الباقي ثابت.» <span class="mute">(شد المحفظة بالإيدين: مفيش حاجة اتحركت)</span></td></tr>
+        <tr><td>16–21s</td><td>«جلد طبيعي كامل الحبيبة، وحواف بتشطيب إيطالي يدوي. ضمان 6 أشهر على الخياطة والتشطيب.»</td></tr>
+        <tr><td>21–25s</td><td>«اطلب من وقار.» <span class="mute">(المحفظة مقفولة على خلفية خشب)</span></td></tr>
+        <tr><td>On-screen</td><td>«تنقطع غرزة؟ الباقي ثابت.» · «خياطة سرج بإبرتين» · «شحن مجاني · قسّمها على 4»</td></tr>
+        <tr><td>Caption</td><td>محفظة وقار من جلد طبيعي كامل الحبيبة.<br>تُخاط يدويًا بالكامل. التفاصيل في البروفايل.<br>#حرفة #محفظة</td></tr>
+      </tbody></table></div>
+    </article>
+    <article class="script">
+      <div class="script-h"><h4>S2 · الشماغ (ميتا · الهوية)</h4><span class="mono mute">15–20 ث · لايف ستايل · AI أو تصوير</span></div>
+      <div class="tw" style="margin:0;border:0;border-radius:0"><table><tbody>
+        <tr><td>0–3s</td><td><b>نص على الشاشة + صوت هادي:</b> «الشماغ ما يليق إلا الطبيعي.» <span class="mute">(إيد بتعدّل طرف شماغ أبيض، والمحفظة طالعة من جيب الثوب)</span></td></tr>
+        <tr><td>3–9s</td><td>«ولا المحفظة.» <span class="mute">(لقطة قريبة: الجلد والحبيبة)</span></td></tr>
+        <tr><td>9–15s</td><td>«جلد كامل الحبيبة، مخيطة باليد. كل قطعة لها طابعها — ما فيه ثنتين متطابقة.»</td></tr>
+        <tr><td>15–20s</td><td>«اطلب من وقار.»</td></tr>
+        <tr><td>تحذير</td><td>ممنوع العلم والشعار الرسمي. وممنوع صور فولدر <span class="ltr">Wallet/ai photo</span> لحد ما تتراجع (فيها تشابه مع Von Baer).</td></tr>
+      </tbody></table></div>
+    </article>
+    <article class="script">
+      <div class="script-h"><h4>S3 · عبّيتها 12 (ميتا · النحافة / الطقم)</h4><span class="mono mute">20 ث · فوق الترابيزة · موبايل</span></div>
+      <div class="tw" style="margin:0;border:0;border-radius:0"><table><tbody>
+        <tr><td>0–3s</td><td>«عبّيتها 12 بطاقة وفلوس… وشوف سمكها.» <span class="mute">(تايم لابس للتعبئة)</span></td></tr>
+        <tr><td>3–10s</td><td>«6 فتحات تشيل من 8 لـ 12 كرت، وجيب للفلوس. وما تنتفخ في الجيب.» <span class="mute">(المحفظة جنب موبايل عشان المقارنة)</span></td></tr>
+        <tr><td>10–16s</td><td>«ولو تبي تخفف أكثر — حافظة البطاقات. والثنتين مع بعض بـ 499.» <span class="mute">(تظهر الحافظة)</span></td></tr>
+        <tr><td>16–20s</td><td>«شحن مجاني، وقسّمها على 4. اطلب من وقار.»</td></tr>
+        <tr><td>تحذير</td><td>ما تقولش «كبسة تطلع البطاقات» غير لما الميكانيزم يتأكد.</td></tr>
+      </tbody></table></div>
+    </article>
+    <article class="script">
+      <div class="script-h"><h4>T1 · سألوني «السعر؟» (تيك توك · Reply)</h4><span class="mono mute">15–25 ث · Reply to comment · صوت</span></div>
+      <div class="tw" style="margin:0;border:0;border-radius:0"><table><tbody>
+        <tr><td>0–2s</td><td>فقاعة الكومنت «السعر؟» + «هذا جوابي…»</td></tr>
+        <tr><td>2–10s</td><td>«بس قبل السعر، شوف هالحافة.» <span class="mute">(ماكرو: إصبع بيعدّي على الحافة)</span> «هنا تعرف المحفظة اللي تعيش من اللي تتقشر.»</td></tr>
+        <tr><td>10–18s</td><td>«ومخيطة سرج بإبرتين باليد. السعر 329، وتقدر تقسّمها على 4.»</td></tr>
+        <tr><td>18–22s</td><td>«الرابط في البايو.»</td></tr>
+        <tr><td>ليه</td><td>بيحوّل أكتر كومنت متكرر لمحتوى، وبيمشي على قاعدة «الكابشن من غير سعر».</td></tr>
+      </tbody></table></div>
+    </article>
+    <article class="script">
+      <div class="script-h"><h4>T2 · الصوت (تيك توك · ASMR)</h4><span class="mono mute">12–18 ث · ميكروفون قريب · من غير كلام تقريبًا</span></div>
+      <div class="tw" style="margin:0;border:0;border-radius:0"><table><tbody>
+        <tr><td>0–2s</td><td>نص: «هذا الصوت هو أهم شي في المحفظة 🔊» + صوت شد الغرزة</td></tr>
+        <tr><td>2–12s</td><td>غرزة ورا غرزة بإبرتين، والإيقاع ماشي مع الصوت. وبعدين صنفرة الحافة والتشطيب.</td></tr>
+        <tr><td>12–18s</td><td>المحفظة خلصت وبتتقفل. نص: «وقار · مخيطة باليد».</td></tr>
+        <tr><td>محتاج</td><td>تصوير ورشة الصانع <span class="tag a">موافقة</span>. ولو مش متاح، Veo بإيد بس، ويتكتب عليه «تمثيل».</td></tr>
+      </tbody></table></div>
+    </article>
+    <article class="script">
+      <div class="script-h"><h4>T3 · نفس المحفظة بعد 6 أشهر (تيك توك · Patina)</h4><span class="mono mute">10–15 ث · سبليت سكرين</span></div>
+      <div class="tw" style="margin:0;border:0;border-radius:0"><table><tbody>
+        <tr><td>0–2s</td><td>«نفس المحفظة. أول يوم…»</td></tr>
+        <tr><td>2–8s</td><td>«…وبعد ستة أشهر.» <span class="mute">(نفس الإضاءة ونفس الزاوية: اللون غمق والجلد لمع)</span></td></tr>
+        <tr><td>8–15s</td><td>«الجلد الطبيعي يكبر معك ويزيد جمال. الرخيص يتقشر.» · «اطلب من وقار.»</td></tr>
+        <tr><td>شرط</td><td>من برنامج التعتيق الحقيقي بس. <b>ممنوع</b> Patina معمولة بالـ AI أو بالفلتر، عشان دي تبقى ادعاء كاذب.</td></tr>
+      </tbody></table></div>
+    </article>
+  </div>
+  <h3>ماتريكس التيست</h3>
+  <div class="grid g2">
+    <div class="card"><h4>متغيّر واحد في كل مرة</h4><ul>
+      <li>أسبوع 1–2: <b>الزاوية</b> (3 ad sets).</li>
+      <li>أسبوع 3–4: <b>الهوك</b> على الزاوية الكسبانة (3 هوكات × نفس الجسم).</li>
+      <li>شهر 2: <b>الفورمات</b> (UGC قدام ديمو قدام ستاتيك) و<b>العرض</b> (A قدام B).</li>
+    </ul></div>
+    <div class="card"><h4>بنقرا بالترتيب ده</h4><ul>
+      <li>Hook rate (3s ÷ Impressions): الهدف أعلى من 30%.</li>
+      <li>Hold rate (ThruPlay ÷ 3s): أعلى من 25%.</li>
+      <li>CTR link: أعلى من 1.3%.</li>
+      <li>ATC rate من الزوار: أعلى من 6%.</li>
+      <li>CPA: أقل من 200 في شهر 1، وأقل من 150 في شهر 2.</li>
+      <li><b>Fatigue:</b> CTR وقع 25% عن أفضل 3 أيام، أو CPM زاد 30% ← كرييتيف جديد.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ORGANIC -->
+<section id="organic">
+  <div class="sec-h"><span class="num">12 · Organic</span><h2>الأورجانيك: الصفحة لازم تبان عايشة</h2><p>اللي جاي من إعلان بارد بيدخل البروفايل قبل ما يشتري. لو البروفايل فاضي، التحويل بيقع. المطلوب قبل الإطلاق 9 بوستات على إنستجرام و6 على تيك توك، وبعدها 4 بوستات في الأسبوع.</p></div>
+  <div class="grid g4">
+    <div class="card"><h4>الحرفة · 40%</h4><p class="mute">غرز، وحواف، وقص جلد، وصوت الورشة. وده بيتعمل إعلان على طول.</p></div>
+    <div class="card"><h4>الزمن · 20%</h4><p class="mute">Patina شهري، وأول يوم قدام بعد شهر. وده سلسلة متابعة.</p></div>
+    <div class="card"><h4>الهوية · 20%</h4><p class="mute">ثوب وشماغ، والمجلس، والسفر. فخامة هادية.</p></div>
+    <div class="card"><h4>الأسئلة · 20%</h4><p class="mute">ردود على كومنتات «السعر؟» و«كم بطاقة؟» و«الضمان؟».</p></div>
+  </div>
+  <div class="callout"><strong>جسر الأورجانيك للمدفوع:</strong> أي بوست على تيك توك يعدّي 10K مشاهدة، أو بوست إنستجرام نسبة الحفظ فيه أعلى من 3%، يتحوّل Spark Ad أو يتعمل بوست لنفس الـ Post ID على ميتا. ده بيوفر إنتاج، وبيحتفظ بالكومنتات كـ Social Proof.</div>
+  <div class="callout warn"><strong>المواسم الجاية:</strong> White Friday (نوفمبر): ما ننزلش بخصم، ننزل بالطقم وتغليف هدية. وقبل يوم التأسيس (22 فبراير): إصدار لون محدود من غير الشعار الرسمي. ورمضان والعيد (تقريبًا فبراير ومارس 2027 <span class="tag a">ASSUMPTION</span>): «هدية العيد» بحفر الاسم، والتجهيز يبدأ من يناير.</div>
+</section>
+
+<!-- KPI -->
+<section id="kpi">
+  <div class="sec-h"><span class="num">13 · KPIs</span><h2>أرقام الـ 90 يوم</h2><p>الشهر الأول <b>شهر تعلّم مش ربح</b>. النجاح فيه: زاوية كسبانة، وCTR أعلى من 1.5%، وCPA بيتجه لتحت، وأول 30 أوردر وأول 10 ريفيوهات. اكتب الكلام ده للعميل من النهارده.</p></div>
+  <div class="tw"><table>
+    <thead><tr><th>المقياس</th><th>شهر 1 (تعلّم)</th><th>شهر 2 (تحسين)</th><th>شهر 3 (سكيل)</th><th>مرجع السوق</th><th>المصدر</th></tr></thead>
+    <tbody>
+      <tr><td>الصرف (ميتا + تيك توك)</td><td class="n ltr">13,500</td><td class="n ltr">18,000</td><td class="n ltr">27,000</td><td>—</td><td>Ads Managers</td></tr>
+      <tr><td>CPM ميتا</td><td class="n ltr">40–50</td><td class="n ltr">38–45</td><td class="n ltr">40–48</td><td class="ltr">30–56 SAR <span class="tag v">V</span></td><td>Meta</td></tr>
+      <tr><td>CTR link (ميتا)</td><td class="n ltr">1.2–1.5%</td><td class="n ltr">1.5–1.8%</td><td class="n ltr">1.6–2.0%</td><td class="ltr">1–2% <span class="tag v">V</span></td><td>Meta</td></tr>
+      <tr><td>CVR الموقع</td><td class="n ltr">1.2–1.6%</td><td class="n ltr">1.8–2.2%</td><td class="n ltr">2.0–2.5%</td><td class="ltr">—</td><td>سلة</td></tr>
+      <tr><td>ATC rate</td><td class="n ltr">5–7%</td><td class="n ltr">7–9%</td><td class="n ltr">8–10%</td><td>—</td><td>سلة</td></tr>
+      <tr><td>CPA (إجمالي)</td><td class="n ltr">200–260</td><td class="n ltr">140–180</td><td class="n ltr">110–150</td><td>BE 158 / 183</td><td>سلة ÷ الصرف</td></tr>
+      <tr><td>الأوردرات</td><td class="n ltr">52–68</td><td class="n ltr">100–130</td><td class="n ltr">180–245</td><td>—</td><td>سلة</td></tr>
+      <tr><td>AOV</td><td class="n ltr">350</td><td class="n ltr">375</td><td class="n ltr">390</td><td>—</td><td>سلة</td></tr>
+      <tr><td>الإيراد</td><td class="n ltr">18–24K</td><td class="n ltr">38–49K</td><td class="n ltr">70–96K</td><td>—</td><td>سلة</td></tr>
+      <tr><td>Blended ROAS</td><td class="n ltr">1.35–1.75</td><td class="n ltr">2.1–2.7</td><td class="n ltr">2.6–3.5</td><td>BE ≈ 2.05</td><td>سلة ÷ الصرف</td></tr>
+      <tr><td>ريفيوهات بالصور</td><td class="n ltr">10+</td><td class="n ltr">35+</td><td class="n ltr">60+</td><td>—</td><td>تطبيق الريفيو</td></tr>
+    </tbody></table></div>
+  <p class="mute">كل الأرقام <span class="tag e">ESTIMATED</span>. مثال لطريقة الحساب: الأوردرات = الصرف ÷ الـ CPA، يعني 13,500 ÷ 230 ≈ 59 (والنطاق 13,500 ÷ 260 لحد 13,500 ÷ 200). والإيراد = الأوردرات × الـ AOV.</p>
+  <h3>شجرة التشخيص</h3>
+  <div class="grid g3">
+    <div class="card"><h4>CPM عالي (أكتر من 60)</h4><p class="mute">الجمهور ضيق أو الـ Quality ranking واطي. ← افتح Broad، وراجع الـ Quality ranking، وبدّل الكرييتيف.</p></div>
+    <div class="card"><h4>CTR واطي (أقل من 1%)</h4><p class="mute">الهوك فشل. ← 3 هوكات جديدة على نفس الجسم. ما تلمسش الاستهداف.</p></div>
+    <div class="card"><h4>CTR عالي وCVR واطي</h4><p class="mute">الإعلان بيقول حاجة والصفحة بتقول حاجة تانية، أو الثقة ناقصة. ← راجع الـ Launch Gate، وطابق العنوان والصور.</p></div>
+    <div class="card"><h4>ATC عالي والشراء واطي</h4><p class="mute">صدمة سعر أو شحن، أو الشيك أوت طويل. ← ظهّر التقسيط، وجرّب الطقم، وابعت رسالة استرجاع السلة بعد ساعة.</p></div>
+    <div class="card"><h4>CPA كويس والربح وحش</h4><p class="mute">المشكلة في الـ AOV أو الهامش، مش في الميديا. ← ادفع الطقم، وراجع تكلفة الشحن والتغليف.</p></div>
+    <div class="card"><h4>إجمالي كويس والفعلي وحش (COD)</h4><p class="mute">مشكلة تأكيد أو توصيل. ← اتصال تأكيد خلال ساعة، وارفع رسوم COD، أو اقفله.</p></div>
+  </div>
+</section>
+
+<!-- SOP -->
+<section id="sop">
+  <div class="sec-h"><span class="num">14 · SOP</span><h2>إدارة الأكاونت يوم بيوم</h2></div>
+  <div class="grid g4">
+    <div class="card"><h4>يوميًا · 15 دقيقة</h4><ul><li>تسارع الصرف</li><li>حالة الـ Learning</li><li>الرد على الكومنتات خلال ساعتين (والرد على «السعر؟» بيتثبت)</li><li>ممنوع تعدّل جوه الـ Learning</li></ul></div>
+    <div class="card"><h4>كل 2–3 أيام</h4><ul><li>Hook وCTR لكل إعلان</li><li>تطبيق قواعد الـ Kill</li><li>الكومنتات: اعتراض جديد؟</li></ul></div>
+    <div class="card"><h4>أسبوعيًا (الأحد)</h4><ul><li>المقارنة بالأهداف</li><li>توزيع الميزانية</li><li>4 كرييتيف جداد</li><li>الـ Frequency والاستبعادات</li><li>تقرير للعميل</li></ul></div>
+    <div class="card"><h4>شهريًا</h4><ul><li>مراجعة الهيكل</li><li>تحديث الـ Unit Economics</li><li>قرار العرض (A ولا B ولا C)</li><li>خطة الشهر الجاي</li></ul></div>
+  </div>
+  <div class="callout"><strong>التقرير الأسبوعي:</strong> المقياس | الهدف | الفعلي | الفرق | التشخيص | الإجراء | المسؤول | الموعد. بيتبعت للعميل كل أحد الضهر على واتساب، كـ PDF أو لينك. وأي تعديل في الأكاونت يتسجل في Change Log: التاريخ والسبب.</div>
+</section>
+
+<!-- RISK -->
+<section id="risk">
+  <div class="sec-h"><span class="num">15 · المخاطر</span><h2>المخاطر والخطة البديلة</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>الخطر</th><th>الاحتمال</th><th>الأثر</th><th>إنذار مبكر</th><th>الوقاية</th><th>البديل</th></tr></thead>
+    <tbody>
+      <tr><td>الأكاونت الإعلاني يتقفل</td><td>متوسط (جديد)</td><td>عالي</td><td>Account quality بيقل · إعلانات Rejected</td><td>سياسات مكتوبة · من غير ادعاءات مبالغ فيها · من غير صور منافس</td><td>BM احتياطي + أكاونت تاني + Admin تاني على الصفحة</td></tr>
+      <tr><td>ادعاء مش متأكد منه (ميكانيزم الكروت، Patina بالـ AI)</td><td>متوسط</td><td>عالي</td><td>كومنتات «مش زي الإعلان»</td><td>تحذيرات القسم 11</td><td>سحب الإعلان فورًا</td></tr>
+      <tr><td>صور مشابهة لـ Von Baer</td><td>عالي لو اتستخدمت</td><td>عالي</td><td>—</td><td>ممنوع فولدر <span class="ltr">Wallet/photo</span>، ومراجعة <span class="ltr">ai photo</span></td><td>تصوير جديد من الموبايل</td></tr>
+      <tr><td>البيكسل يقع</td><td>متوسط</td><td>عالي</td><td>Purchase في ميتا أقل من 60% من سلة</td><td>فحص أسبوعي لـ Test Events</td><td>تحسين على ATC مؤقتًا</td></tr>
+      <tr><td>نفاد اللون الكسبان</td><td>متوسط</td><td>عالي</td><td>المخزون أقل من 15 قطعة</td><td>تقرير مخزون أسبوعي</td><td>الإعلان يتحوّل للون التاني</td></tr>
+      <tr><td>CPA فضل أعلى من 250 أسبوعين</td><td>متوسط</td><td>عالي</td><td>CPA الأسبوع 2</td><td>إصلاحات الصفحة + العرض B</td><td>نوقف ونرجع للصفحة والعرض قبل ما نصرف تاني</td></tr>
+      <tr><td>بطء موافقات العميل</td><td>عالي</td><td>متوسط</td><td>كرييتيف مستني أكتر من 48 ساعة</td><td>موافقة مسبقة على 10 كرييتيف</td><td>تنويعات من الكسبان (من غير موافقة جديدة)</td></tr>
+      <tr><td>تعب الكرييتيف</td><td>عالي</td><td>متوسط</td><td>CTR -25% · CPM +30%</td><td>4 جداد في الأسبوع</td><td>Spark Ads من الأورجانيك</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="sec-h"><span class="num">16 · Roadmap</span><h2>الخطة الزمنية</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>المرحلة</th><th>المهام</th><th>المسؤول</th><th>بيعتمد على</th><th>مقياس النجاح</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td>أسبوع 0 · Blockers</td><td>البيكسل والـ CAPI على ميتا وتيك توك + أوردر تجريبي · صفحة المحفظة حسب الـ Launch Gate · السياسات · تأكيد السعر والحفر والشحن · 12 كرييتيف · 9 بوستات</td><td>Hazem + العميل + مطوّر سلة</td><td>ردود أسئلة القسم 00</td><td>كل الـ Blockers متعلّمين</td></tr>
+      <tr><td>أسبوع 1–2 · إطلاق</td><td>Meta TEST 300/يوم · TikTok 150/يوم · SOP يومي</td><td>Hazem</td><td>أسبوع 0</td><td>زاوية CTR أعلى من 1.3% · أول 20 أوردر</td></tr>
+      <tr><td>أسبوع 3–4 · تحسين</td><td>نقفل الخاسر · 3 هوكات على الكسبان · ASC · ريتارجت · أكبر تسريب في الصفحة يتصلّح</td><td>Hazem</td><td>داتا أسبوع 2</td><td>CPA أقل من 220 · 10 ريفيوهات</td></tr>
+      <tr><td>شهر 2 · أساس</td><td>تيست العرض B (الطقم) · UGC بريفيوهات حقيقية · فيديو الصانع · Snapchat لو الشرط اتحقق</td><td>Hazem + Creators</td><td>ريفيوهات + موافقة الصانع</td><td>CPA أقل من 170 · Blended ROAS أعلى من 2.1</td></tr>
+      <tr><td>شهر 3 · سكيل</td><td>سكيل ASC بالقاعدة · Patina حقيقي · تجهيز رمضان والعيد · رفع السعر 10–12% لو عدّينا 50 ريفيو</td><td>Hazem</td><td>CPA ثابت</td><td>Blended ROAS أعلى من 2.6 · 180+ أوردر</td></tr>
+    </tbody></table></div>
+  <div class="callout"><strong>ترتيب الاعتماد:</strong> من غير CAPI، التحسين بيبقى على داتا ناقصة، وقرارات السكيل بتبقى تخمين. ومن غير صفحة فيها ثقة، الـ CVR بيفضل واطي، والـ CPA بيعدّي نقطة التعادل مهما كان الكرييتيف قوي. ومن غير ريفيوهات، ما نرفعش السعر.</div>
+</section>
+
+<footer>
+  <p><b>المصادر:</b> ملف «WAQAR — الملف المرجعي الشامل» (25 أغسطس 2026)، وده مصدر المواصفات والأسعار المرجعية وصوت العميل · <a href="https://www.bimogroup.co/blog/meta-ads-benchmarks-gulf.html" target="_blank" rel="noopener">BIMO — Meta Ads Gulf Benchmarks 2026</a> · <a href="https://www.hikmahaiagency.com/blog/instagram-ads-benchmarks-saudi-arabia-2026" target="_blank" rel="noopener">Instagram Ad Benchmarks Saudi 2026</a> · <a href="https://thehovi.com/blog/agency-insights/performance-marketing-ksa-uae-strategies-roi-2026" target="_blank" rel="noopener">Performance Marketing KSA 2026 (TikTok CPM)</a> · <a href="https://www.ijjad.com/payment-gateway-fees-saudi-arabia-2026" target="_blank" rel="noopener">Payment Gateway Fees Saudi 2026</a> · <a href="https://logiolegion.com/blogs/tamara-vs-tabby-merchant-fees-mdr-rates-saudi-arabia-2026" target="_blank" rel="noopener">Tabby vs Tamara merchant fees</a> · <a href="https://help.salla.sa/en/article/smart-observer-conversion-tracking/fk2813g1dktkwe3fccrqcadv" target="_blank" rel="noopener">Salla Smart Observer</a> · <a href="https://www.amazon.sa/-/en/%D9%85%D8%AD%D9%81%D8%B8%D8%A9-%D8%B1%D8%AC%D8%A7%D9%84%D9%8A%D8%A9-%D8%AC%D9%84%D8%AF-%D8%B7%D8%A8%D9%8A%D8%B9%D9%8A-%D9%81%D8%A7%D8%AE%D8%B1%D9%87/s?k=%D9%85%D8%AD%D9%81%D8%B8%D8%A9+%D8%B1%D8%AC%D8%A7%D9%84%D9%8A%D8%A9+%D8%AC%D9%84%D8%AF+%D8%B7%D8%A8%D9%8A%D8%B9%D9%8A+%D9%81%D8%A7%D8%AE%D8%B1%D9%87" target="_blank" rel="noopener">Amazon.sa — leather wallets</a> · <a href="https://elegantleather.store/ar" target="_blank" rel="noopener">Elegant Leather</a></p>
+  <p>اللي ما اتأكدش في الريبورت ده: محتوى waqarleather.com الفعلي، ومكتبة إعلانات ميتا للمنافسين، وتكاليف العميل الحقيقية. ودول تلاتة لازم يتقفلوا قبل الإطلاق.</p>
+  <p class="mono">Prepared by Hazem Mohamed · Growth &amp; Performance Marketing · Oct 2026</p>
+</footer>
+</div>
+
+<script>
+(function(){
+  var KEY="waqar-gate-v1", boxes=[].slice.call(document.querySelectorAll(".checklist input[type=checkbox]"));
+  var saved={}; try{ saved=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){}
+  function upd(){ var n=boxes.filter(function(b){return b.checked}).length; var c=document.getElementById("ckCount"), bar=document.getElementById("ckBar"); if(c) c.textContent=n+" / "+boxes.length; if(bar) bar.style.width=(boxes.length?n/boxes.length*100:0)+"%"; }
+  boxes.forEach(function(b,i){ b.id="ck"+i; if(saved[i]) b.checked=true; b.addEventListener("change",function(){ saved[i]=b.checked; try{localStorage.setItem(KEY,JSON.stringify(saved));}catch(e){} upd(); }); });
+  upd();
+  var links=[].slice.call(document.querySelectorAll("#toc a"));
+  if("IntersectionObserver" in window){ var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ links.forEach(function(a){a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id)}); } }); },{rootMargin:"-40% 0px -55% 0px"});
+    document.querySelectorAll("section[id]").forEach(function(s){io.observe(s)}); }
+})();
+</script>
+</body></html>
