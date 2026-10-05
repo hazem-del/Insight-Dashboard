@@ -1,18 +1,12 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><script>/*standalone-video-fix*/(function(){var c={};function fix(v){var s=v.getAttribute("src");if(!s||s.indexOf("data:video")!==0)return;try{if(!c[s]){var b=atob(s.slice(s.indexOf(",")+1)),u=new Uint8Array(b.length);for(var k=0;k<b.length;k++)u[k]=b.charCodeAt(k);c[s]=URL.createObjectURL(new Blob([u],{type:s.slice(5,s.indexOf(";"))}))}var p=!v.paused;v.src=c[s];if(p)v.play().catch(function(){})}catch(e){}}
+function scan(r){if(r.tagName==="VIDEO")fix(r);else if(r.querySelectorAll)r.querySelectorAll("video").forEach(fix)}
+new MutationObserver(function(ms){ms.forEach(function(m){if(m.type==="attributes")fix(m.target);else m.addedNodes.forEach(function(n){if(n.nodeType===1)scan(n)})})}).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["src"]});
+document.addEventListener("DOMContentLoaded",function(){scan(document)})})();</script></head><body>
 <title>Hazem Reels</title>
 <meta name="description" content="Hazem Mohamed, media buyer and e-commerce growth operator in Cairo. The portfolio as a vertical feed: one hook, one number per reel.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
-<script>/* embedded videos: data URI -> blob URL (Safari plays these reliably) */
-(function(){var c={};function fix(v){var s=v.getAttribute("src");if(!s||s.indexOf("data:video")!==0)return;try{if(!c[s]){var b=atob(s.slice(s.indexOf(",")+1)),u=new Uint8Array(b.length);for(var k=0;k<b.length;k++)u[k]=b.charCodeAt(k);c[s]=URL.createObjectURL(new Blob([u],{type:"video/mp4"}))}var p=!v.paused;v.src=c[s];if(p)v.play().catch(function(){})}catch(e){}}
-new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType!==1)return;if(n.tagName==="VIDEO")fix(n);else if(n.querySelectorAll)n.querySelectorAll("video").forEach(fix)})})}).observe(document.documentElement,{childList:true,subtree:true});
-document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll("video").forEach(fix)})})();
-</script>
 <style>
 /* REELS — the portfolio is a vertical feed. Phone-ratio feed in the centre, reel list left, live insights right. Every reel gets its own flat colour like a creator's story; type does the work, no decoration. Dark chrome on purpose (single look). */
 :root{
@@ -269,9 +263,6 @@ td.dim{color:var(--mute)}
   .cap{bottom:calc(22px + env(safe-area-inset-bottom,0px))}
 }
 </style>
-</head>
-<body>
-
 
 <div class="app">
   <aside class="side left" aria-label="Profile and reels">
@@ -514,5 +505,4 @@ feed.focus({preventScroll:true});
 })();
 </script>
 
-</body>
-</html>
+</body></html>
