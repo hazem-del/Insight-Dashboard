@@ -1,28 +1,31 @@
 # برومبتين البورتفوليو 3 و4
 
+P3 اتغيّر من Campaign Manager لـ Money Table.
+
 الصق البرومبت في Claude، وارفع معاه الصور (hazem-studio.webp وhazem-robot.webp وmark-hazem.webp) وملف clients.js، أو الصق الأرقام.
 
-## P3 · Campaign Manager
+## P3 · Money Table
 
 ```
-<role>Senior product designer and front-end engineer who builds portfolio sites for performance marketers.</role>
+<role>Senior creative technologist who builds award-level interactive portfolios with physics and motion.</role>
 
-<task>Build ONE self-contained HTML file: a portfolio for Hazem Mohamed, media buyer and e-commerce growth operator in Cairo, designed as an ad account. The visitor should feel they opened his campaign manager, not a website.</task>
+<task>Build ONE self-contained HTML file: a portfolio for Hazem Mohamed, media buyer and e-commerce growth operator in Cairo, designed as a games table the visitor plays. Every section is a toy that proves one real number. It must be fun on a phone and on a desktop.</task>
 
-<content>Use only the data I attach (clients.js: four accounts, Laser Afandi, Athr, Dahsha Store, KH-ART, with KPIs, charts and tables) plus: 580K+ EGP documented revenue, 1,500+ COD orders, 7,900+ WhatsApp chats in 30 days, 40.77× peak ad set ROAS, 250+ campaigns and ad sets, 300+ creatives. Never invent a number, a client or a testimonial.</content>
+<content>Use only the data I attach (clients.js: Laser Afandi, Athr, Dahsha Store, KH-ART with KPIs, charts and tables) plus: 580K+ EGP documented revenue; 1,500+ COD orders; 7,900+ WhatsApp chats; 40.77× peak ad set ROAS (185.45 EGP spend, 7,560 EGP revenue, AI still, broad audience, 22 May 2026); 47% checkout leak (1,233 reached checkout, 650 finished, 583 sent to WhatsApp recovery); Athr ABO sweep of 105 creatives, winner VID 2 at 17.66× with 344 purchases; records 19.99× peak day, 39.78 EGP best CPA, +1,158% orders, +763% profit, 7.37% conversion, 634 month-one orders, 3.56 EGP cheapest chat, 144 EGP target CPA hit. Never invent a number, a client or a testimonial. State in the footer that the toys illustrate real results and are not simulations of them.</content>
 
 <design>
-- App shell: fixed left icon rail (Overview, Campaigns, Breakdown, Method, Services, Hire, theme toggle) that becomes a bottom tab bar under 760px; a sticky top bar with an account switcher (avatar, name, role; opens contact details with copy buttons), a date-range chip, a search field that filters the tables live, a "4 accounts live" status and a primary "Start a project" button.
-- Palette: light #F2F3EF ground, white panels, ink #15181A, one money green #0B7A55 for actions and good numbers, marker yellow #FFE27A for the one phrase to read, red only for leaks. A full dark theme with the same tokens, following the OS and a toggle.
-- Type: Instrument Sans for UI, Instrument Serif italic for the greeting only ("Hi, I'm Hazem."), IBM Plex Mono for labels, IBM Plex Sans Arabic for Arabic lines.
-- Overview: greeting card plus an "Ad preview" card styled as a sponsored post, whose image is a drag-to-compare slider between the studio portrait (A) and the AI twin (B), with a one-time auto sweep and keyboard arrows. Six KPI tiles count up when they appear.
-- Campaigns card with tabs Campaigns / Ads / Records: clients as table rows (delivery status pill, objective, results, reach or revenue, signature number, window); creatives as ad cards with ROAS or cost per chat and a LOST tag on the losing studio ad; records as a dated table. On phones the campaign table turns into stacked cards. Every row opens a right-side drawer with tabs Overview / Breakdown / Tables, next and previous campaign, focus trap and Esc to close; the screen-recording videos play inside it.
-- Breakdown card with a select (funnel, revenue mix, catalogue) and an "Opportunity" callout for the 47% checkout leak. A pricing card for the 770 EGP no-discount decision.
-- Method as a five-stage pipeline (Learning, Active, Scaling pills). Services as "People and permissions": 12 switches that are all on; trying to switch one off shakes it and shows "Hazem covers this one too."
-- Hire: plan radio cards, a short form, and a live summary whose button opens WhatsApp (+201095109901) with the request filled in. FAQ as a help-centre accordion.
+- Look: green felt (#0F3B2D with a fine dot texture), ink #07120E for alternate sections, chalk #F4F0E6 text, gold #F6B93B for money moving, coral #FF6A4D for money lost, mint #79E2B1 for money recovered. The hire section is chalk paper. Type: Unbounded 800–900 for display, DM Sans for text, JetBrains Mono for labels, IBM Plex Sans Arabic for Arabic.
+- Hero: the studio portrait centred; the letters of HAZEM MOHAMED and 12 stat chips fall in as Matter.js bodies synced to DOM spans. Drag and throw them (mouse and touch; a touch that misses a body still scrolls the page). Mouse movement blows them; "Shake the table" throws everything; "Meet my AI twin" flips the portrait in 3D to the robot cutout. On phones, tilting the device shifts gravity (ask iOS permission on the Shake tap) and shaking the phone shakes the table.
+- Checkout machine: canvas coins fall through a funnel into a chute; a dashed checkout gate; 47% of coins leak out of a side opening, turn coral and land in "Walked away". A WhatsApp recovery switch closes the opening with a mint flap and leakers turn mint and land in "Completed". Live counters, auto-drop when in view, tap the machine to drop coins where you tap.
+- 40.77× slot: a lever (drag it down on desktop, button on phones) spins revenue from 0 to 7,560, slams a 40.77× stamp and bursts gold coins; ROAS race bars for the top four creatives below.
+- ABO test: 105 physics tiles pile up; "Run the test" kills losers in waves (they turn coral and fall through the floor), then VID 2 flies to the centre, grows 2.4× and shows 17.66× · 344 purchases.
+- Cases: four playing cards fanned on desktop with 3D tilt on hover; on phones a swipeable deck (fling the top card, tap to open). Opening a card expands a full-screen case file with a circle clip from the tap point (KPIs, bars, tables, the Ads Manager screen recordings).
+- Records: a split-flap board that flips in when seen and re-flips on click. The loop: a draggable dial of five steps that snaps and auto-advances. The stack: 12 service chips in a physics jar you can shake and throw.
+- Hire: plan cards, a short form and a printed order slip whose button opens WhatsApp (+201095109901) with the request filled in; FAQ accordion.
+- Motion: loader coin flip, Lenis smooth scroll on desktop, GSAP ScrollTrigger word reveals, dark sections dealt in with a rounded clip, a gold cursor on desktop that turns into labels (THROW, DROP, PULL, RUN, OPEN, FLIP, SPIN, SHAKE), circle menu reveal.
 </design>
 
-<build>No libraries. Responsive with no horizontal scroll at 390px, visible focus states, prefers-reduced-motion respected, content visible without JavaScript animations. Output the full file, then list anything you could not find in the data.</build>
+<build>GSAP 3.12.5 + ScrollTrigger, Lenis 1.1.13 and Matter.js 0.20.0 from CDN only. Fixed-step physics per world, worlds paused off screen. If Matter fails to load, show the hero and jar as static stacks. prefers-reduced-motion: pre-settle every world, no auto motion. No horizontal scroll at 360–1440px, visible focus states, Esc closes overlays. Output the full file, then list anything you could not find in the data.</build>
 ```
 
 ## P4 · Reels
